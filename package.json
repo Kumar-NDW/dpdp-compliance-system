@@ -1,14 +1,14 @@
 {
   "name": "dpdp-compliance-system",
   "version": "1.0.0",
-  "description": "DPDP Act 2023 Compliance System with Automated Grievance Handling",
+  "description": "DPDP Act 2023 Compliance System",
   "main": "index.html",
   "scripts": {
-    "dev": "vercel dev",
-    "build": "echo 'Static site - no build needed'",
-    "start": "vercel dev"
+    "build": "echo 'Static site ready'",
+    "start": "echo 'Static site'",
+    "dev": "echo 'Static site'"
   },
-  "keywords": ["dpdp", "compliance", "privacy", "grievance", "automation"],
+  "keywords": ["dpdp", "compliance", "privacy"],
   "author": "Newgen Digital",
-  "license": "TBD"
+  "license": "No License"
 }
