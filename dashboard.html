@@ -1,0 +1,633 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DPDP Compliance Dashboard - Newgen Digital</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.15);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-size: 24px;
+            color: white;
+        }
+
+        .card-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .stat-number {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 0.9em;
+        }
+
+        .workflow-section {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .workflow-title {
+            font-size: 1.8em;
+            color: #2c3e50;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .workflow-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .workflow-step {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .workflow-step::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: rotate(45deg);
+            transition: all 0.5s;
+            opacity: 0;
+        }
+
+        .workflow-step:hover::before {
+            opacity: 1;
+            transform: rotate(45deg) translate(50%, 50%);
+        }
+
+        .step-number {
+            font-size: 2em;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .step-title {
+            font-size: 1.1em;
+            font-weight: 600;
+            margin-bottom: 8px;
+        }
+
+        .step-desc {
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .compliance-checklist {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .checklist-item {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .checklist-item:hover {
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .check-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            font-weight: bold;
+        }
+
+        .live-status {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 20px 0;
+        }
+
+        .status-indicator {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #28a745;
+            margin-right: 8px;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 1em;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+
+        .footer {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            color: #666;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+        }
+
+        .integration-badges {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+
+        .badge {
+            padding: 8px 16px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 500;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 10px;
+            }
+            
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🛡️ DPDP Compliance Dashboard</h1>
+            <p>Newgen Digital - Data Protection & Privacy Management</p>
+            <div class="live-status">
+                <div class="status-indicator"></div>
+                <span>System Active - Real-time Monitoring</span>
+            </div>
+            <div class="integration-badges">
+                <span class="badge">📊 Database</span>
+                <span class="badge">🤖 n8n Automation</span>
+                <span class="badge">📁 Google Drive</span>
+                <span class="badge">📧 Gmail</span>
+                <span class="badge">💬 Slack</span>
+            </div>
+        </div>
+
+        <!-- Dashboard Cards -->
+        <div class="dashboard-grid">
+            <!-- Data Inventory Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #3498db, #2980b9);">📊</div>
+                    <div class="card-title">Data Inventory</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">127</div>
+                        <div class="stat-label">Data Assets</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">15</div>
+                        <div class="stat-label">Data Categories</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">98%</div>
+                        <div class="stat-label">Mapped</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">23</div>
+                        <div class="stat-label">High Risk</div>
+                    </div>
+                </div>
+                <a href="#" class="btn" style="width: 100%; margin-top: 15px;">View Inventory</a>
+            </div>
+
+            <!-- Grievance Management Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #e74c3c, #c0392b);">🎯</div>
+                    <div class="card-title">Grievance Management</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">12</div>
+                        <div class="stat-label">Active Cases</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">45</div>
+                        <div class="stat-label">Resolved</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">18.5</div>
+                        <div class="stat-label">Avg Days</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">100%</div>
+                        <div class="stat-label">Auto-Ack</div>
+                    </div>
+                </div>
+                <a href="#" class="btn" style="width: 100%; margin-top: 15px;">Manage Grievances</a>
+            </div>
+
+            <!-- Consent Management Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #27ae60, #229954);">✅</div>
+                    <div class="card-title">Consent & Rights</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">1,247</div>
+                        <div class="stat-label">Consents</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">34</div>
+                        <div class="stat-label">DSAR Requests</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">89%</div>
+                        <div class="stat-label">Valid</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">8</div>
+                        <div class="stat-label">Withdrawn</div>
+                    </div>
+                </div>
+                <a href="#" class="btn" style="width: 100%; margin-top: 15px;">Rights Portal</a>
+            </div>
+
+            <!-- Security & Audit Card -->
+            <div class="card">
+                <div class="card-header">
+                    <div class="card-icon" style="background: linear-gradient(135deg, #9b59b6, #8e44ad);">🔒</div>
+                    <div class="card-title">Security & Audit</div>
+                </div>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-number">3</div>
+                        <div class="stat-label">Audits</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">0</div>
+                        <div class="stat-label">Breaches</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">156</div>
+                        <div class="stat-label">Staff Trained</div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-number">95%</div>
+                        <div class="stat-label">Compliance</div>
+                    </div>
+                </div>
+                <a href="#" class="btn" style="width: 100%; margin-top: 15px;">Security Center</a>
+            </div>
+        </div>
+
+        <!-- Automated Workflow Section -->
+        <div class="workflow-section">
+            <h2 class="workflow-title">🤖 Automated Grievance Workflow</h2>
+            <div class="workflow-steps">
+                <div class="workflow-step">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Grievance Trigger</div>
+                    <div class="step-desc">Detects new grievance automatically</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Drive Folder</div>
+                    <div class="step-desc">Creates evidence folder structure</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Email Acknowledgment</div>
+                    <div class="step-desc">Sends instant confirmation to complainant</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">4</div>
+                    <div class="step-title">DPO Notification</div>
+                    <div class="step-desc">Alerts team via Slack/Email</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Record Update</div>
+                    <div class="step-desc">Links evidence folder to case</div>
+                </div>
+                <div class="workflow-step">
+                    <div class="step-number">6</div>
+                    <div class="step-title">Timeline Tracking</div>
+                    <div class="step-desc">Monitors 30-day resolution SLA</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Compliance Checklist -->
+        <div class="workflow-section">
+            <h2 class="workflow-title">📋 DPDP Act 2023 Compliance Status</h2>
+            <div class="compliance-checklist">
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Data Processing Activities Mapped & Documented</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Privacy Policy Published & Updated</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Grievance Redressal Mechanism Implemented</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Data Principal Rights Management System</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Consent Collection & Management Framework</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Data Security Safeguards & Encryption</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Breach Detection & Response Procedures</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Staff Training & Awareness Programs</div>
+                </div>
+                <div class="checklist-item">
+                    <div class="check-icon">✓</div>
+                    <div>Regular Audit & Assessment Schedule</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Charts Section -->
+        <div class="workflow-section">
+            <h2 class="workflow-title">📈 Compliance Analytics</h2>
+            <div class="dashboard-grid">
+                <div class="chart-container">
+                    <canvas id="grievanceChart"></canvas>
+                </div>
+                <div class="chart-container">
+                    <canvas id="complianceChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <h3>🏢 Newgen Digital - Data Protection Office</h3>
+            <p>Fully automated DPDP Act 2023 compliance system with real-time monitoring</p>
+            <p>Last Updated: <span id="lastUpdated"></span> | System Status: ✅ All Systems Operational</p>
+        </div>
+    </div>
+
+    <script>
+        // Update timestamp
+        document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+
+        // Grievance Trend Chart
+        const grievanceCtx = document.getElementById('grievanceChart').getContext('2d');
+        new Chart(grievanceCtx, {
+            type: 'line',
+            data: {
+                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'],
+                datasets: [{
+                    label: 'Grievances Received',
+                    data: [2, 1, 4, 3, 6, 4, 5, 7, 3],
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: 'Resolved',
+                    data: [2, 1, 4, 3, 5, 4, 5, 6, 4],
+                    borderColor: '#27ae60',
+                    backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Grievance Management Trends'
+                    },
+                    legend: {
+                        position: 'top'
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Compliance Score Chart
+        const complianceCtx = document.getElementById('complianceChart').getContext('2d');
+        new Chart(complianceCtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Implemented', 'In Progress', 'Pending'],
+                datasets: [{
+                    data: [85, 12, 3],
+                    backgroundColor: ['#27ae60', '#f39c12', '#e74c3c'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Overall Compliance Score: 95%'
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+
+        // Simulate real-time updates
+        setInterval(() => {
+            document.getElementById('lastUpdated').textContent = new Date().toLocaleString();
+        }, 30000);
+
+        // Add click handlers for interactive elements
+        document.querySelectorAll('.btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                alert('Redirecting to ' + btn.textContent + '...\n(In actual implementation, this would link to respective modules)');
+            });
+        });
+    </script>
+</body>
+</html>
